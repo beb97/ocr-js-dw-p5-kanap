@@ -47,7 +47,7 @@
         <section class="item">
           <article>
             <div class="item__img">
-              <!-- <img src="../images/logo.png" alt="Photographie d'un canapé"> -->
+<!--              <img src="../images/logo.png" alt="Photographie d'un canapé">-->
             </div>
             <div class="item__content">
 
@@ -61,25 +61,29 @@
                 <p id="description"><!-- Dis enim malesuada risus sapien gravida nulla nisl arcu. --></p>
               </div>
 
-              <div class="item__content__settings">
-                <div class="item__content__settings__color">
-                  <label for="color-select">Choisir une taille :</label>
-                  <select name="color-select" id="colors">
-                      <option value="">--SVP, choisissez une couleur --</option>
-<!--                       <option value="vert">vert</option>
-                      <option value="blanc">blanc</option> -->
-                  </select>
+<!--              P6 ON RAJOUTE form : pour la validation -->
+              <form>
+                <div class="item__content__settings">
+                  <div class="item__content__settings__color">
+                    <label for="color-select">Choisir une taille :</label>
+                    <select name="color-select" id="colors">
+                        <option value="" disabled="disabled">--SVP, choisissez une couleur --</option>
+  <!--                       <option value="vert">vert</option>
+                        <option value="blanc">blanc</option> -->
+                    </select>
+                  </div>
+
+                  <div class="item__content__settings__quantity">
+                    <label for="itemQuantity">Nombre d'article(s) (1-100) :</label>
+                    <input type="number" name="itemQuantity" min="1" max="100" value="0" id="quantity" required>
+                  </div>
                 </div>
 
-                <div class="item__content__settings__quantity">
-                  <label for="itemQuantity">Nombre d'article(s) (1-100) :</label>
-                  <input type="number" name="itemQuantity" min="1" max="100" value="0" id="quantity">
+                <div class="item__content__addButton">
+<!--                 P6 on rajoute type="button" : pour éviter le submit du form-->
+                  <button type="button" id="addToCart">Ajouter au panier</button>
                 </div>
-              </div>
-
-              <div class="item__content__addButton">
-                <button id="addToCart">Ajouter au panier</button>
-              </div>
+              </form>
 
             </div>
           </article>
