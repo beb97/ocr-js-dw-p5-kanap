@@ -1,29 +1,40 @@
 let panier = JSON.parse(localStorage.panier);
-let apiUrl = "http://localhost:3000/api/products/"
-
-// let urls = [];
-//
-// for(let canap of panier) {
-//     // On créé la liste des URLs à interroger pour chaque canap
-//     urls.push(apiUrl+canap.id);
-// }
+let urlApiProduit = "http://localhost:3000/api/products/"
+let urlApiCommande = "http://localhost:3000/api/products/order"
+let urlPageCommande ="confirmation.html"
 
 let totalQty = 0;
 let totalPrice = 0;
 let index = 0;
-for(let canap of panier) {
-    canap.index = index;
-    fetch(apiUrl+canap.id)
-        .then(response => response.json())
-        .then(json => {
-            canap.data = json;
-            totalPrice += canap.data.price * canap.qte;
-            totalQty += parseInt(canap.qte);
-            afficherCanap(canap);
-        })
-        .catch(err => console.log(err))
-    index++;
+
+creerPage();
+
+function creerPage() {
+    creerCanaps();
+    creerFormulaire();
 }
+
+/*************
+ P A N I E R
+ *************/
+
+function creerCanaps() {
+    for(let canap of panier) {
+        canap.index = index;
+        fetch(urlApiProduit+canap.id)
+            .then(response => response.json())
+            .then(json => {
+                canap.data = json;
+                totalPrice += canap.data.price * canap.qte;
+                totalQty += parseInt(canap.qte);
+                afficherCanap(canap);
+            })
+            .catch(err => console.log(err))
+        index++;
+    }
+// TODO : trier l'ordre des canaps
+}
+
 
 // // On déclenche un fetch pour chaque URL
 // Promise.all(panier.map( canap => fetch(apiUrl+canap.id)
@@ -55,7 +66,8 @@ function afficherCanap(canap) {
 
     // Calcul du prix
     let price = parseInt(canap.qte) * canap.data.price;
-    clone.querySelector("p").innerText = formatPrice(price);
+    clone.querySelector(".color").innerText = canap.color;
+    clone.querySelector(".price").innerText = formatPrice(price);
     clone.querySelector(".unitPrice").innerText = ` x ${formatPrice(canap.data.price)}`;
 
     // Listener qty
@@ -95,4 +107,108 @@ function saveCartAndReload() {
 
 function formatPrice(price) {
     return new Intl.NumberFormat('fr-FR', {style: 'currency', currency: 'EUR', minimumFractionDigits: 0}).format(price);
+}
+
+/*******************
+F O R M U L A I R E
+*******************/
+
+function creerFormulaire() {
+    document.querySelector("form").addEventListener("submit", function (e) {
+        e.preventDefault();
+        // e.stopPropagation();
+
+        if(isFormValid()) {
+            envoyerForm();
+        }
+    })
+}
+
+function envoyerForm() {
+    console.log(creerBody());
+    fetch(urlApiCommande, {
+        method: 'post',
+        headers: {"Content-type": "application/json"},
+        body: JSON.stringify(creerBody())
+    })
+        .then(response => response.json())
+        .then(json => afficherPageConfirmation(json.orderId))
+        .catch(err => console.log(err))
+}
+
+function afficherPageConfirmation(orderId) {
+    window.location.replace(urlPageCommande+"?orderid="+orderId);
+}
+
+/** VALIDATION DU FORMULAIRE **/
+
+function isFormValid() {
+    let regexNom = /^[A-Za-zÀ-ÿ]+$/;
+    let regexAdresse = /^[a-zA-Z0-9\s,'-]+$/;
+    let regexVille = /^[a-zA-Z]+(?:[\\s-][a-zA-Z]+)*$/;
+    let regexEmail = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
+
+    let firstName = document.querySelector("#firstName");
+    let lastName = document.querySelector("#lastName");
+    let address = document.querySelector("#address");
+    let city = document.querySelector("#city");
+    let email = document.querySelector("#email");
+
+    let isFormValid = true;
+    isFormValid &= isInputValid(firstName, regexNom, "prénom incorrect");
+    isFormValid &= isInputValid(lastName, regexNom, "nom incorrect");
+    isFormValid &= isInputValid(address, regexAdresse, "adresse incorrecte");
+    isFormValid &= isInputValid(city, regexVille, "ville incorrecte");
+    isFormValid &= isInputValid(email, regexEmail, "email incorrect");
+
+   return isFormValid;
+}
+
+function isInputValid(input, regex, message) {
+    if(!regex.test(input.value)) {
+        // console.log("invalid", input.name);
+        input.nextElementSibling.innerText = message;
+        return false;
+    } else {
+        // console.log("valid", input.name);
+        input.nextElementSibling.innerText = "";
+        return true;
+    }
+}
+
+/** CREATION DE LA REQUETE POST **/
+
+/*
+Exemple de body :
+{
+    "contact": {
+        "firstName":"pierre",
+        "lastName":"bebon",
+        "address":"3 rue moulin",
+        "city":"nantes",
+        "email":"monemail@email.com"
+    },
+    "products": ["415b7cacb65d43b2b5c1ff70f3393ad1", "107fb5b75607497b96722bda5b504926"]
+}
+ */
+function creerBody() {
+    return {
+        contact:getContact(),
+        products:getProducts()
+    }
+}
+
+function getContact() {
+    return {
+        firstName:document.querySelector("#firstName").value,
+        lastName:document.querySelector("#lastName").value,
+        address:document.querySelector("#address").value,
+        city:document.querySelector("#city").value,
+        email:document.querySelector("#email").value,
+    }
+}
+
+function getProducts() {
+    return panier.map(canap => canap.id);
+
 }
