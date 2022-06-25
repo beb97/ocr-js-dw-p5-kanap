@@ -18,6 +18,7 @@ function creerPage() {
  P A N I E R
  *************/
 
+// Récupére les informations canap et affiche les éléments
 function creerCanaps() {
     let promesses = [];
 
@@ -43,6 +44,7 @@ function creerCanaps() {
             // Pour finir on créé les totaux qte et price
             creerTotaux(canaps);
         }).catch(logError);
+    // TUTO sur les promesses : https://www.youtube.com/watch?v=uUZxHkcidps
 }
 
 // La fonction de comparaison pour la méthode sort
